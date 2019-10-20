@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace SerjTm.Lifehack.Chat
 {
@@ -51,26 +53,31 @@ namespace SerjTm.Lifehack.Chat
     }
     public class Users
     {
-        Dictionary<int, string> users = new Dictionary<int, string>();
+        ImmutableDictionary<int, string> users = ImmutableDictionary<int, string>.Empty;
 
         public void Add(int id, string name)
         {
-            lock(users)
+            for (; ; )
             {
-                users[id] = name;
+                var currentUsers = users;
+                var newUsers = currentUsers.Add(id, name);
+                if (Interlocked.Exchange(ref users, newUsers) == currentUsers)
+                    break;
             }
         }
         public void Remove(int id)
         {
-            lock (users)
+            for (; ; )
             {
-                users.Remove(id);
+                var currentUsers = users;
+                var newUsers = currentUsers.Remove(id);
+                if (Interlocked.Exchange(ref users, newUsers) == currentUsers)
+                    break;
             }
         }
-        public string[] All()
+        public IEnumerable<string> All()
         {
-            lock (users)
-                return users.Values.ToArray();
+           return users.Values;
         }
     }
 
