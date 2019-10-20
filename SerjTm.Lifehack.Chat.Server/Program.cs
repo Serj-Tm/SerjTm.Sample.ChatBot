@@ -39,13 +39,18 @@ namespace SerjTm.Lifehack.Chat.Server
                     Console.Error.WriteLine(exc);
             }
         }
+#pragma warning disable 1998
+
         static async Task CancelByAnyKey(Cancel cancel)
         {
             Console.WriteLine("Нажмите любую клавишу для останова сервера");
-            Console.ReadKey();
+            Console.ReadKey(true);
             Console.WriteLine("Работа сервера прервана пользователем");
             cancel.TokenSource.Cancel();
         }
+
+#pragma warning restore 1998
+
 
         static async Task ChatServer(Cancel cancel)
         {
