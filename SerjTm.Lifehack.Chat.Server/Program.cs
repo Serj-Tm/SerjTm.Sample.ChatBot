@@ -25,16 +25,25 @@ namespace SerjTm.Lifehack.Chat.Server
 
         static async Task Main(string[] args)
         {
-            //var cancelTokenSource = new CancellationTokenSource();
-            var cancel = new Cancel();
+            try
+            {
+                var cancel = new Cancel();
 
-            await Task.WhenAll(ChatServer(cancel), CancelByAnyKey(cancel));
+                await Task.WhenAll(ChatServer(cancel), CancelByAnyKey(cancel));
 
+            }
+            catch (Exception exc)
+            {
+                var aggregateExc = exc as AggregateException;
+                if (!(aggregateExc?.InnerExceptions?.Count == 1 && aggregateExc?.InnerExceptions[0] is OperationCanceledException))
+                    Console.Error.WriteLine(exc);
+            }
         }
         static async Task CancelByAnyKey(Cancel cancel)
         {
-            Console.WriteLine("Press any key to stop");
+            Console.WriteLine("Нажмите любую клавишу для останова сервера");
             Console.ReadKey();
+            Console.WriteLine("Работа сервера прервана пользователем");
             cancel.TokenSource.Cancel();
         }
 
@@ -115,7 +124,9 @@ namespace SerjTm.Lifehack.Chat.Server
             }
             catch (Exception exc)
             {
-                Console.Error.WriteLine(exc);
+                var aggregateExc = exc as AggregateException;
+                if (!(aggregateExc?.InnerExceptions?.Count == 1 && aggregateExc?.InnerExceptions[0] is OperationCanceledException))
+                    Console.Error.WriteLine(exc);
                 throw;
             }
         }
