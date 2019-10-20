@@ -66,7 +66,6 @@ namespace SerjTm.Lifehack.Chat.Server
                 for (var id = 0;  !cancel.Token.IsCancellationRequested; id++)
                 {
                     var client = await listener.AcceptTcpClientAsync().OrCancel(cancel);
-                    Console.WriteLine("Присоединился клиент");
 
                     var session = Task.Run(() => ChatSession(id, users, processor, client, cancel));
                     sessions.Add(session);
@@ -87,7 +86,7 @@ namespace SerjTm.Lifehack.Chat.Server
             {
                 using (client)
                 {
-                    Console.WriteLine("Запуск обработки клиента");
+                    Console.WriteLine($"{id}: Начата обработка");
                     var stream = client.GetStream();
                     using (var reader = new StreamReader(stream))
                     using (var writer = new StreamWriter(stream) { AutoFlush = true })
@@ -103,7 +102,7 @@ namespace SerjTm.Lifehack.Chat.Server
                             writer.WriteLine($"{name}, добро пожаловать!");
                             writer.WriteLine("Доступные команды:");
                             foreach (var command in processor.Commands)
-                                writer.WriteLine(command.Name);
+                                writer.WriteLine($"  {command.Name}");
                             writer.WriteLine();
 
                             while (!cancel.Token.IsCancellationRequested)
